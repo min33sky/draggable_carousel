@@ -11,6 +11,7 @@ export default function Carousel({ images }: Props) {
   const [prevPageX, setPrevPageX] = useState(0); //? 이전 마우스 X 좌표
   const [prevScrollLeft, setPrevScrollLeft] = useState(0); //? 이전 캐러셀 스크롤 X 좌표
   const [positionDiff, setPositionDiff] = useState(0); //? 마우스 이동 거리
+  const [isMoving, setIsMoving] = useState(false); //? AutoSlide 도중에 새로운 드래그 이벤트를 막기 위한 상태
 
   const carouselRef = React.useRef<HTMLDivElement>(null);
 
@@ -18,6 +19,8 @@ export default function Carousel({ images }: Props) {
   const dragStart = (
     e: React.MouseEvent<HTMLImageElement> & React.TouchEvent<HTMLImageElement>,
   ) => {
+    if (isMoving) return;
+
     setIsDragStart(true);
     setPrevPageX(e.pageX || e.touches[0].pageX);
     setPrevScrollLeft(carouselRef.current?.scrollLeft || 0);
@@ -28,6 +31,7 @@ export default function Carousel({ images }: Props) {
     e: React.MouseEvent<HTMLImageElement> & React.TouchEvent<HTMLImageElement>,
   ) => {
     if (!isDragStart) return;
+    if (isMoving) return;
 
     /**
      *? 마우스 이벤트일 때만 적용한다.
@@ -53,8 +57,10 @@ export default function Carousel({ images }: Props) {
     e: React.MouseEvent<HTMLImageElement> & React.TouchEvent<HTMLImageElement>,
   ) => {
     if (!isDragging) return;
+    if (isMoving) return;
     setIsDragStart(false);
     setIsDragging(false);
+
     autoSlide();
   };
 
@@ -69,6 +75,8 @@ export default function Carousel({ images }: Props) {
       carouselRef.current.scrollLeft <= 0
     )
       return;
+
+    setIsMoving(true);
 
     const absPositionDiff = Math.abs(positionDiff);
 
@@ -102,6 +110,10 @@ export default function Carousel({ images }: Props) {
         behavior: 'smooth',
       });
     }
+
+    setTimeout(() => {
+      setIsMoving(false);
+    }, 500);
   };
 
   //? 버튼 클릭 시 스크롤
