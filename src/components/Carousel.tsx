@@ -78,7 +78,6 @@ export default function Carousel({ carouselImages }: Props) {
     console.log('이동: ', prevScrollLeft, valDifference);
 
     if (carouselRef.current.scrollLeft > prevScrollLeft) {
-      console.log('오른쪽: ', absPositionDiff > firstImageWidth / 3);
       carouselRef.current.scrollTo({
         left:
           absPositionDiff > firstImageWidth / 3
@@ -87,12 +86,11 @@ export default function Carousel({ carouselImages }: Props) {
         behavior: 'smooth',
       });
     } else {
-      console.log('왼쪽');
       carouselRef.current.scrollTo({
         left:
           absPositionDiff > firstImageWidth / 3
-            ? prevScrollLeft - skip - valDifference
-            : -absPositionDiff,
+            ? carouselRef.current.scrollLeft - skip - valDifference
+            : carouselRef.current.scrollLeft + absPositionDiff,
         behavior: 'smooth',
       });
     }
