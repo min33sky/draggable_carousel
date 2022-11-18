@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
 interface Props {
-  carouselImages: string[];
+  images: string[];
 }
 
-export default function Carousel({ carouselImages }: Props) {
-  const [images, setImages] = useState(carouselImages); // TODO: 필요없는 듯?? Props로 대체 가능
+export default function Carousel({ images }: Props) {
   const [isDragStart, setIsDragStart] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [prevPageX, setPrevPageX] = useState(0); //? 이전 마우스 X 좌표
@@ -16,19 +15,31 @@ export default function Carousel({ carouselImages }: Props) {
   const carouselRef = React.useRef<HTMLDivElement>(null);
 
   //? 드래그 시작
-  const dragStart = (e: React.MouseEvent<HTMLImageElement>) => {
+  const dragStart = (
+    e: React.MouseEvent<HTMLImageElement> & React.TouchEvent<HTMLImageElement>,
+  ) => {
     setIsDragStart(true);
-    setPrevPageX(e.pageX);
+    setPrevPageX(e.pageX || e.touches[0].pageX);
     setPrevScrollLeft(carouselRef.current?.scrollLeft || 0);
   };
 
   //? 드래그 중
-  const dragging = (e: React.MouseEvent<HTMLImageElement>) => {
+  const dragging = (
+    e: React.MouseEvent<HTMLImageElement> & React.TouchEvent<HTMLImageElement>,
+  ) => {
     if (!isDragStart) return;
-    e.preventDefault();
+
+    /**
+     *? 마우스 이벤트일 때만 적용한다.
+     *? 터치 이벤트때 Unable to preventDefault inside passive event listener 경고가 발생해서
+     */
+    if (e.type === 'mousemove') {
+      e.preventDefault();
+    }
+
     setIsDragging(true);
 
-    const positionDiff = e.pageX - prevPageX;
+    const positionDiff = (e.pageX || e.touches[0].pageX) - prevPageX;
 
     carouselRef.current?.scrollTo({
       left: prevScrollLeft - positionDiff,
@@ -38,7 +49,9 @@ export default function Carousel({ carouselImages }: Props) {
   };
 
   //? 드래그 끝
-  const dragEnd = (e: React.MouseEvent<HTMLImageElement>) => {
+  const dragEnd = (
+    e: React.MouseEvent<HTMLImageElement> & React.TouchEvent<HTMLImageElement>,
+  ) => {
     if (!isDragging) return;
     setIsDragStart(false);
     setIsDragging(false);
@@ -127,6 +140,9 @@ export default function Carousel({ carouselImages }: Props) {
         onMouseMove={dragging}
         onMouseLeave={dragEnd}
         onMouseUp={dragEnd}
+        onTouchStart={dragStart}
+        onTouchMove={dragging}
+        onTouchEnd={dragEnd}
       >
         {images.map((image, index) => (
           <img
