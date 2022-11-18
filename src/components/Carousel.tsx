@@ -16,8 +16,6 @@ export default function Carousel({ carouselImages }: Props) {
 
   //? 드래그 시작
   const dragStart = (e: React.MouseEvent<HTMLImageElement>) => {
-    console.log('prevPageX', e.pageX);
-    console.log('scrollLeft', carouselRef.current?.scrollLeft);
     setIsDragStart(true);
     setPrevPageX(e.pageX);
     setPrevScrollLeft(carouselRef.current?.scrollLeft || 0);
@@ -40,7 +38,6 @@ export default function Carousel({ carouselImages }: Props) {
 
   //? 드래그 끝
   const dragEnd = (e: React.MouseEvent<HTMLImageElement>) => {
-    console.log('드래그 끝: ', isDragging);
     if (!isDragging) return;
     setIsDragStart(false);
     setIsDragging(false);
@@ -60,7 +57,7 @@ export default function Carousel({ carouselImages }: Props) {
       return;
 
     const absPositionDiff = Math.abs(positionDiff);
-    // console.log('absPositionDiff', absPositionDiff);
+    console.log('절대 이동 거리', absPositionDiff);
 
     const firstImageWidth =
       carouselRef.current.firstElementChild?.clientWidth! + 14;
@@ -77,13 +74,17 @@ export default function Carousel({ carouselImages }: Props) {
       skip = firstImageWidth * quotient;
     }
 
+    console.log('skip: ', skip, firstImageWidth);
+    console.log('이동: ', prevScrollLeft, valDifference);
+
     if (carouselRef.current.scrollLeft > prevScrollLeft) {
-      console.log('오른쪽');
+      console.log('오른쪽: ', absPositionDiff > firstImageWidth / 3);
       carouselRef.current.scrollTo({
         left:
           absPositionDiff > firstImageWidth / 3
-            ? prevScrollLeft + skip + valDifference
-            : -absPositionDiff,
+            ? carouselRef.current.scrollLeft + skip + valDifference
+            : carouselRef.current.scrollLeft - absPositionDiff,
+        behavior: 'smooth',
       });
     } else {
       console.log('왼쪽');
@@ -91,7 +92,8 @@ export default function Carousel({ carouselImages }: Props) {
         left:
           absPositionDiff > firstImageWidth / 3
             ? prevScrollLeft - skip - valDifference
-            : absPositionDiff,
+            : -absPositionDiff,
+        behavior: 'smooth',
       });
     }
   };
