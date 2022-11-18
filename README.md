@@ -4,6 +4,8 @@
 
 ## Demo
 
+[Demo](https://draggable-carousel.netlify.app/)
+
 ## Installation
 
 ```bash
